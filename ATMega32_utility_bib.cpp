@@ -50,8 +50,7 @@ ADC_read pin(7);
 uint16_t analog7 = pin.adcwert(); // ADC in Pin 7
 
   SET_BIT(PORTA,7);
-       _delay_ms(1);
-       CLR_BIT(PORTA,7);
+       
        
 	if((analog7>=337) && (analog7<=343)) {taste = 1; }
 	else if((analog7>=268) && (analog7<=274)) {taste = 2;}
