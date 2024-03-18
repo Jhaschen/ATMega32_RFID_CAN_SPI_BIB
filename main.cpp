@@ -64,7 +64,51 @@ UART.UsartPuts("\n\r");
 	for (;;)
 	{
 	
-	if(UART.UsartGetc()=='1') TGL_BIT(LED_PORT,1);
+
+	status = mfrc522_request(PICC_REQALL,str);  //Prüfe, ob ein Tag in der nähe ist
+	
+	if(status== CARD_FOUND)
+	{
+	UART.UsartPuts("CARD FOUND  ");
+	
+	if(str[0] == 0x04)
+	{
+	UART.UsartPuts("Mifare_One_S50 FOUND   ");
+	}	
+	sprintf(buffer,"TagType: 0x%x%x ", str[0],str[1]);	// Zeichenkette erzeugen und in dn Zwischenspeicher schreiben
+	UART.UsartPuts(buffer);		   // Versionsnummer ausgeben	  
+	
+	
+	
+	uint8_t UID_Status = mfrc522_get_card_serial(str);
+	sprintf(buffer,"UID: 0x%x%x%x%x ", str[0],str[1],str[2],str[3]);	// Zeichenkette erzeugen und in dn Zwischenspeicher schreiben UID Ausgeben (4 Byte)
+	UART.UsartPuts(buffer);		   // UID Seriennummer ausgeben	
+	
+	sendmsg.data[0]=status;			// Status in das Datenbyte 0 schreiben
+	sendmsg.data[1]=str[0];				// UID Byte 1 in das Datenbyte 1 schreiben
+	sendmsg.data[2]=str[1];			// UID Byte 2 in das Datenbyte 2 schreiben
+	sendmsg.data[3]=str[2];		// UID Byte 3 in das Datenbyte 3 schreiben
+	sendmsg.data[4]=str[3];		// UID Byte 4 in das Datenbyte 4 schreiben
+	can_send_message(&sendmsg);		// CAN-Nachricht versenden
+				
+	
+	 
+	}else{
+	UART.UsartPuts("CARD NOT FOUND");
+	sendmsg.data[0]=status;			// Status in das Datenbyte 0 schreiben
+	can_send_message(&sendmsg);		// CAN-Nachricht versenden
+	
+	}
+	UART.UsartPuts("\n\r");		   // Neue Zeile	
+	
+	if(can_check_message()) // Prüfe, ob Nachricht empfangen wurde.
+	{
+	can_get_message(&resvmsg);
+	
+	sprintf(buffer,"CAN_Message mit der ID 0x%x empfangen ", resvmsg.id);	// Zeichenkette erzeugen und in dn Zwischenspeicher schreiben
+	UART.UsartPuts(buffer);		   // Versionsnummer ausgeben	
+	}
+	
 	_delay_ms(1000);
 	
 	}
