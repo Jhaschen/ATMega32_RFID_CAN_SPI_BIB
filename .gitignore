@@ -1,0 +1,13 @@
+*.eep
+*.hex
+*.lss
+*.map
+*.sym
+*.elf
+*.log
+.dep/*
+obj/*
+.vscode
+c_cpp_properties.json
+
+
