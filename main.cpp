@@ -5,7 +5,6 @@
 #include "ATMega32_utility_bib.h"
 #include "rfid.h"
 #include "can.h"
-#include "lcd.h"
 
 
 // UID S50 Mifare 1K Chip auslesen
@@ -48,23 +47,38 @@ int main ()
 	
 	can_init(BITRATE_500_KBPS);      // CAN init 500 kbit/s
 	mfrc522_init();			// RC522 initialisieren 
-	USART UART(8,0,1,38400);	// USART init 8 Zeichenbits , keien Paritätsbits , 1 Stoppbit, 9600 Zeichen pro Sekunde
+	USART UART(8,0,1,9600);	// USART init 8 Zeichenbits , keien Paritätsbits , 1 Stoppbit, 9600 Zeichen pro Sekunde
+	
+	uint8_t status=0; 		// Statusbyte RFID Reader
+	uint8_t str[MAX_LEN];	        // Datenarray für ein Sektor (16 Byte)  (MIFARE S50)
+	char buffer[100];		// Buffer zur Zwschischenspeicherung von Zeichenketten
+	
+	can_t resvmsg;          // Message-Objekt auf dem Stack anlegen
+   	can_t sendmsg;          // Message-Objekt auf dem Stack anlegen
+        sendmsg.id = 0x27;          // ID setzen, hier: dec 
+        sendmsg.flags.rtr = 0;      // Remote-Transmission-Request -> aus
+        sendmsg.length = 5;         // Länge der Nachricht: 1 Byte
 	
 	
-_delay_ms(1000);	
-UART.UsartPuts("AT+UART=9600,1,0");
-_delay_ms(1000);
-UART.UsartPuts("\n\r");
-UART.UsartPuts("AT+RESET");
-_delay_ms(1000);
-UART.UsartPuts("\n\r");
+	status = mfrc522_read(VersionReg); // Prüfen, ob Reader erreichbar und auslesen der Version 1.0 oder 2.0
+	if(status== 0x92) // Prüfen, ob Reader gefunden Versionsnummer 0x92
+	{
+	sprintf(buffer,"Version: 0x%x   READER FOUND", status);	// Zeichenkette erzeugen und in dn Zwischenspeicher schreiben
+	UART.UsartPuts(buffer);		   // Versionsnummer ausgeben
+	}else // sonst Fehlermeldung ausgeben
+	{
+	sprintf(buffer,"Version: 0x%x   READER NOT FOUND", status);	// Zeichenkette erzeugen und in dn Zwischenspeicher schreiben
+	UART.UsartPuts(buffer);		   // Versionsnummer ausgeben
+	}
+	UART.UsartPuts("\n\r");		   // Neue Zeile
+	
+
 	
 	
 	
 	for (;;)
 	{
 	
-
 	status = mfrc522_request(PICC_REQALL,str);  //Prüfe, ob ein Tag in der nähe ist
 	
 	if(status== CARD_FOUND)
@@ -104,7 +118,6 @@ UART.UsartPuts("\n\r");
 	if(can_check_message()) // Prüfe, ob Nachricht empfangen wurde.
 	{
 	can_get_message(&resvmsg);
-	
 	sprintf(buffer,"CAN_Message mit der ID 0x%x empfangen ", resvmsg.id);	// Zeichenkette erzeugen und in dn Zwischenspeicher schreiben
 	UART.UsartPuts(buffer);		   // Versionsnummer ausgeben	
 	}
