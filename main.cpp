@@ -118,6 +118,7 @@ int main ()
 	if(can_check_message()) // Prüfe, ob Nachricht empfangen wurde.
 	{
 	can_get_message(&resvmsg);
+	
 	sprintf(buffer,"CAN_Message mit der ID 0x%x empfangen ", resvmsg.id);	// Zeichenkette erzeugen und in dn Zwischenspeicher schreiben
 	UART.UsartPuts(buffer);		   // Versionsnummer ausgeben	
 	}
