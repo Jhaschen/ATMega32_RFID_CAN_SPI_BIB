@@ -77,7 +77,7 @@ OBJDIR = obj
 
 
 # List C source files here. (C dependencies are automatically generated.)
-SRC =
+SRC = lcd_i2c_lib/font.c lcd_i2c_lib/I2C_Master_C_file.c lcd_i2c_lib/lcd.c
 
 
 # List C++ source files here. (C dependencies are automatically generated.)
@@ -110,7 +110,7 @@ DEBUG = dwarf-2
 #     Each directory must be seperated by a space.
 #     Use forward slashes for directory separators.
 #     For a directory that has spaces, enclose it in quotes.
-EXTRAINCDIRS = avr-can-rfid-lib
+EXTRAINCDIRS = avr-can-rfid-lib lcd_i2c_lib
 
 
 # Compiler flag to set the C Standard level.
